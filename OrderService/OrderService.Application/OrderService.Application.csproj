@@ -6,4 +6,14 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="EventHandlers\" />
+    <Folder Include="Behaviors\" />
+    <Folder Include="NotificationHandlers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrderService.Domain\OrderService.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
