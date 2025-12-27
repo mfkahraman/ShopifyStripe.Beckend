@@ -8,8 +8,13 @@
 
   <ItemGroup>
     <Folder Include="EventHandlers\" />
-    <Folder Include="Behaviors\" />
     <Folder Include="NotificationHandlers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="Serilog" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

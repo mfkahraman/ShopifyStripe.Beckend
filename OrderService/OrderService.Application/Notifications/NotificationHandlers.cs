@@ -9,6 +9,7 @@ namespace OrderService.Application.Notifications
             OrderCreatedNotification notification,
             CancellationToken cancellationToken)
         {
+            // TO DO
             // Inventory → ReserveStockCommand
             return Task.CompletedTask;
         }
