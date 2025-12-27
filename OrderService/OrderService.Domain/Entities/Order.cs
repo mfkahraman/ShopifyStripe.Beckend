@@ -1,70 +1,76 @@
 ﻿using OrderService.Domain.Common;
+using OrderService.Domain.Enums;
+using OrderService.Domain.Events;
+using OrderService.Domain.Exceptions;
+using OrderService.Domain.ValueObjects;
 
 namespace OrderService.Domain.Entities
 {
     public class Order : AggregateRoot
     {
-        public long OrderNumber { get; private set; }
-        public int CustomerId { get; private set; }
-        public Address ShippingAddress { get; private set; }
+        public string ExternalOrderId { get; private set; }
         public OrderStatus Status { get; private set; }
+        public Money TotalAmount { get; private set; }
 
         private readonly List<OrderItem> _items = new();
         public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
-        private Order() { }
+        private Order() { } // EF Core
 
-        public Order(int customerId, Address shippingAddress, List<OrderItem> items)
+        public static Order Create(
+            string externalOrderId,
+            Money totalAmount,
+            List<OrderItem> items)
         {
-            if (!items.Any())
-                throw new DomainException("Siparişte en az bir ürün olmalıdır.");
+            if (items == null || !items.Any())
+                throw new DomainException("Order must have at least one item.");
 
-            CustomerId = customerId;
-            ShippingAddress = shippingAddress;
-            Status = OrderStatus.Pending;
-
-            ;
-
-            foreach (var item in items)
+            var order = new Order
             {
-                AddItem(item);
-            }
+                ExternalOrderId = externalOrderId,
+                TotalAmount = totalAmount,
+                Status = OrderStatus.Created
+            };
 
-            AddDomainEvent(new OrderCreatedEvent(Id, CustomerId, CreatedAt, _items));
+            order._items.AddRange(items);
+            order.AddDomainEvent(new OrderCreatedDomainEvent(order));
+
+            return order;
         }
 
-        public void AddItem(OrderItem item)
+        public void MarkStockReserved()
         {
-            if (Status != OrderStatus.Pending)
-                throw new DomainException("Sipariş durumu ürün eklemeye uygun değil.");
+            if (Status != OrderStatus.Created)
+                throw new DomainException("Stock can only be reserved for newly created orders.");
 
-            _items.Add(item);
+            Status = OrderStatus.StockReserved;
+            AddDomainEvent(new OrderStockReservedDomainEvent(this));
         }
 
-        public void Complete()
+        public void MarkPaymentPending()
         {
-            if (!_items.Any())
-                throw new DomainException("Sipariş boş olamaz.");
+            if (Status != OrderStatus.StockReserved)
+                throw new DomainException("Payment can only start after stock reservation.");
 
-            Status = OrderStatus.Completed;
+            Status = OrderStatus.PaymentPending;
         }
 
-        public void MarkAsStockFailed()
+        public void MarkAsPaid()
         {
-            if (Status != OrderStatus.Pending)
-                throw new DomainException("Yalnızca bekleyen siparişler iptal edildi olarak işaretlenebilir.");
+            if (Status != OrderStatus.PaymentPending)
+                throw new DomainException("Order is not ready to be marked as paid.");
+
+            Status = OrderStatus.Paid;
+            AddDomainEvent(new OrderPaidDomainEvent(this));
+        }
+
+        public void Cancel()
+        {
+            if (Status != OrderStatus.PaymentPending)
+                throw new DomainException("Only pending orders can be cancelled.");
 
             Status = OrderStatus.Cancelled;
+            AddDomainEvent(new OrderCancelledDomainEvent(this));
         }
-
-        public void MarkAsCompleted()
-        {
-            if (Status != OrderStatus.Pending)
-                throw new DomainException("Yalnızca bekleyen siparişler tamamlandı olarak işaretlenebilir.");
-
-            Status = OrderStatus.Completed;
-        }
-
     }
-
 }

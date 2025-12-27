@@ -2,9 +2,11 @@
 {
     public enum OrderStatus
     {
-        Pending = 0,
-        Completed = 1,
-        Shipped = 2,
-        Cancelled = 3
+        Created = 1,
+        StockReserved = 2,
+        PaymentPending = 3,
+        Paid = 4,
+        Cancelled = 5,
+        Refunded = 6
     }
 }

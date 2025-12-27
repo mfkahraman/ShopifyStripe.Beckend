@@ -1,25 +1,21 @@
 ﻿using OrderService.Domain.Common;
+using OrderService.Domain.ValueObjects;
 
 namespace OrderService.Domain.Entities
 {
-    public class OrderItem : Entity
+    public class OrderItem : BaseEntity
     {
-        public int ProductId { get; private set; }
-        public string ProductName { get; private set; }
+        public string ProductId { get; private set; }
         public int Quantity { get; private set; }
-        public Money Price { get; private set; }
+        public Money UnitPrice { get; private set; }
 
-        private OrderItem() { }
+        private OrderItem() { } // EF Core
 
-        public OrderItem(int productId, string productName, int quantity, Money price)
+        public OrderItem(string productId, int quantity, Money unitPrice)
         {
-            if (quantity <= 0)
-                throw new DomainException("Ürün miktarı sıfırdan büyük olmalıdır.");
-
             ProductId = productId;
-            ProductName = productName;
             Quantity = quantity;
-            Price = price;
+            UnitPrice = unitPrice;
         }
     }
 }

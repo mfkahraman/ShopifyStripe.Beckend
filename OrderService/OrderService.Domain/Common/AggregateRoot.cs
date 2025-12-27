@@ -1,12 +1,12 @@
 ﻿namespace OrderService.Domain.Common
 {
-    public abstract class AggregateRoot : Entity
+    public abstract class AggregateRoot : BaseEntity
     {
-        private readonly List<DomainEvent> _domainEvents = new();
+        private readonly List<object> _domainEvents = new();
 
-        public IReadOnlyCollection<DomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+        public IReadOnlyCollection<object> DomainEvents => _domainEvents.AsReadOnly();
 
-        protected void AddDomainEvent(DomainEvent domainEvent)
+        protected void AddDomainEvent(object domainEvent)
         {
             _domainEvents.Add(domainEvent);
         }
